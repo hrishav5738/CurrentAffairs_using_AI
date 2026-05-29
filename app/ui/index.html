@@ -1,0 +1,3072 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aspirant Portal - UPSC Pulse AI Dashboard</title>
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Lucide Icons via CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    /* Design Tokens & CSS Reset */
+    :root {
+      --bg-darkest: #07080e;
+      --bg-darker: #0d0f1a;
+      --bg-card: #131626;
+      --bg-card-hover: #191d32;
+      --border-color: rgba(255, 255, 255, 0.06);
+      --border-purple: rgba(139, 92, 246, 0.2);
+      --border-purple-hover: rgba(139, 92, 246, 0.4);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-purple: #8b5cf6;
+      --accent-purple-light: #a78bfa;
+      --accent-cyan: #06b6d4;
+      --accent-cyan-light: #22d3ee;
+      --gradient-primary: linear-gradient(135deg, #a78bfa, #8b5cf6);
+      --gradient-cyan-blue: linear-gradient(135deg, #06b6d4, #3b82f6);
+      --font-heading: 'Outfit', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+      /* Themeable extra properties */
+      --header-gradient: linear-gradient(135deg, rgba(19, 22, 38, 0.8), rgba(13, 15, 26, 0.9));
+      --title-gradient: linear-gradient(to right, #ffffff 30%, #ebdfff 70%, #a78bfa 100%);
+      --tag-bg: rgba(255, 255, 255, 0.04);
+      --chat-bg: rgba(19, 22, 38, 0.3);
+      --option-bg: rgba(7, 8, 14, 0.3);
+      --btn-primary-bg: #1e2238;
+      --btn-primary-hover-bg: #272c47;
+      --btn-primary-text: #f8fafc;
+      --card-shadow-hover: 0 10px 30px rgba(139, 92, 246, 0.06);
+      --tab-btn-active-bg: rgba(139, 92, 246, 0.15);
+    }
+
+    body.light-theme {
+      --bg-darkest: #f4f6fa;
+      --bg-darker: #ffffff;
+      --bg-card: #ffffff;
+      --bg-card-hover: #f8fafc;
+      --border-color: rgba(99, 102, 241, 0.12); /* Soft Indigo border */
+      --border-purple: rgba(139, 92, 246, 0.18);
+      --border-purple-hover: rgba(139, 92, 246, 0.35);
+      --text-primary: #1e1b4b; /* Deep Indigo-950 for contrast */
+      --text-secondary: #312e81; /* Indigo-900 */
+      --text-muted: #6366f1; /* Indigo-500 for bright highlights */
+      --accent-purple: #6d28d9;
+      --accent-purple-light: #7c3aed;
+      --accent-cyan: #0891b2;
+      --accent-cyan-light: #06b6d4;
+      --gradient-primary: linear-gradient(135deg, #7c3aed, #4f46e5);
+      --gradient-cyan-blue: linear-gradient(135deg, #0891b2, #4f46e5);
+      
+      --header-gradient: linear-gradient(135deg, #e0e7ff 0%, #ede9fe 50%, #e0f2fe 100%);
+      --title-gradient: linear-gradient(to right, #1e1b4b 20%, #4338ca 60%, #6d28d9 100%);
+      --tag-bg: rgba(99, 102, 241, 0.08);
+      --chat-bg: rgba(99, 102, 241, 0.04);
+      --option-bg: rgba(255, 255, 255, 0.8);
+      --btn-primary-bg: #4f46e5; /* Stunning vibrant indigo */
+      --btn-primary-hover-bg: #4338ca; /* Indigo-700 */
+      --btn-primary-text: #ffffff;
+      --card-shadow-hover: 0 12px 36px rgba(99, 102, 241, 0.16); /* Dynamic colorful light mode shadow */
+      --tab-btn-active-bg: rgba(99, 102, 241, 0.14);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-darkest);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      display: flex;
+      overflow-x: hidden;
+      transition: filter 0.3s ease;
+    }
+
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-darkest);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #232742;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #2e3357;
+    }
+
+    /* Sidebar Layout */
+    aside {
+      width: 260px;
+      background-color: var(--bg-darker);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 24px 16px;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 100;
+      transition: var(--transition-smooth);
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px;
+      margin-bottom: 24px;
+    }
+
+    .brand-logo {
+      width: 40px;
+      height: 40px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-purple);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-purple-light);
+      box-shadow: 0 0 15px rgba(139, 92, 246, 0.15);
+    }
+
+    .brand-info h2 {
+      font-family: var(--font-heading);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--accent-purple-light);
+    }
+
+    .brand-info p {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Sidebar Navigation */
+    nav {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: var(--transition-smooth);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .nav-item:hover {
+      background-color: rgba(139, 92, 246, 0.06);
+      color: var(--text-primary);
+    }
+
+    .nav-item.active {
+      background-color: rgba(139, 92, 246, 0.12);
+      color: var(--text-primary);
+      border-left: 3px solid var(--accent-purple);
+      border-radius: 0 10px 10px 0;
+      padding-left: 11px;
+    }
+
+    .nav-item i {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* Sidebar Footer */
+    .sidebar-footer {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: auto;
+    }
+
+    .btn-focus {
+      width: 100%;
+      background: var(--gradient-cyan-blue);
+      border: none;
+      color: white;
+      padding: 12px;
+      border-radius: 12px;
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: var(--transition-smooth);
+      box-shadow: 0 4px 15px rgba(6, 182, 212, 0.25);
+    }
+
+    .btn-focus:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(6, 182, 212, 0.4);
+      filter: brightness(1.1);
+    }
+
+    /* Main Content Area */
+    main {
+      margin-left: 260px;
+      flex-grow: 1;
+      padding: 32px 40px;
+      max-width: 1400px;
+      width: calc(100% - 260px);
+      transition: var(--transition-smooth);
+    }
+
+    /* Page Sections (Hidden by Default) */
+    .page-section {
+      display: none;
+    }
+
+    .page-section.active {
+      display: block;
+      animation: fadeIn 0.4s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Common Header Component */
+    .header-dashboard {
+      background: var(--header-gradient);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 32px;
+      margin-bottom: 32px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+
+    .compact-header {
+      padding: 18px 24px !important;
+      margin-bottom: 18px !important;
+    }
+
+    .header-dashboard::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -10%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .header-title-container h1 {
+      font-family: var(--font-heading);
+      font-size: 32px;
+      font-weight: 850;
+      letter-spacing: -0.5px;
+      background: var(--title-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 30px rgba(139, 92, 246, 0.15);
+    }
+
+    .header-subtitle {
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 400;
+      margin-top: 4px;
+    }
+
+    .header-meta {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      padding-top: 20px;
+      margin-top: 20px;
+    }
+
+    .meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .meta-value {
+      font-family: var(--font-heading);
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .meta-value.cyan-text {
+      color: var(--accent-cyan-light);
+      text-shadow: 0 0 15px rgba(6, 212, 238, 0.15);
+    }
+
+    .meta-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .divider {
+      width: 1px;
+      height: 36px;
+      background-color: rgba(255, 255, 255, 0.08);
+    }
+
+    /* Stat Cards Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+      transition: var(--transition-smooth);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--border-purple-hover);
+      background-color: var(--bg-card-hover);
+      box-shadow: var(--card-shadow-hover);
+    }
+
+    /* Stat card border highlights for colorful premium aesthetics */
+    .stats-grid .stat-card:nth-child(1) { border-left: 4px solid #8b5cf6; }
+    .stats-grid .stat-card:nth-child(2) { border-left: 4px solid #06b6d4; }
+    .stats-grid .stat-card:nth-child(3) { border-left: 4px solid #10b981; }
+    .stats-grid .stat-card:nth-child(4) { border-left: 4px solid #f59e0b; }
+
+    .stat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .stat-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background-color: rgba(139, 92, 246, 0.08);
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-purple-light);
+    }
+
+    .stat-icon.cyan-style {
+      background-color: rgba(6, 182, 212, 0.08);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      color: var(--accent-cyan-light);
+    }
+
+    .badge-today {
+      background-color: rgba(6, 182, 212, 0.12);
+      border: 1px solid rgba(6, 182, 212, 0.2);
+      color: var(--accent-cyan-light);
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .stat-info h3 {
+      font-family: var(--font-heading);
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .stat-info p {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    /* Filters Section */
+    .controls-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .search-filter-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-grow: 1;
+      max-width: 500px;
+    }
+
+    .search-box {
+      position: relative;
+      flex-grow: 1;
+    }
+
+    .search-box i {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      width: 16px;
+      height: 16px;
+    }
+
+    .search-box input {
+      width: 100%;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 11px 16px 11px 40px;
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 14px;
+      transition: var(--transition-smooth);
+    }
+
+    .search-box input:focus {
+      outline: none;
+      border-color: var(--accent-purple);
+      box-shadow: 0 0 10px rgba(139, 92, 246, 0.15);
+    }
+
+    .category-tabs {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .tab-btn {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+      border-color: rgba(255, 255, 255, 0.12);
+      color: var(--text-primary);
+    }
+
+    .tab-btn.active {
+      background-color: var(--tab-btn-active-bg);
+      border-color: var(--accent-purple);
+      color: var(--accent-purple-light);
+      font-weight: 600;
+    }
+
+    .source-select {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 9px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      outline: none;
+      transition: var(--transition-smooth);
+    }
+
+    .source-select:hover {
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    /* Articles Grid Layout */
+    .articles-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+
+    .article-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: var(--transition-smooth);
+      position: relative;
+    }
+
+    .article-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--border-purple-hover);
+      box-shadow: var(--card-shadow-hover);
+    }
+
+    .article-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .source-tag {
+      background-color: var(--tag-bg);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-secondary);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .article-date {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: var(--font-body);
+    }
+
+    .btn-bookmark {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: var(--transition-smooth);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-bookmark:hover {
+      color: var(--accent-purple-light);
+    }
+
+    .btn-bookmark.active {
+      color: var(--accent-purple-light);
+      fill: var(--accent-purple-light);
+    }
+
+    .article-title {
+      font-family: var(--font-heading);
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1.4;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+      transition: var(--transition-smooth);
+    }
+
+    .article-card:hover .article-title {
+      color: var(--accent-purple-light);
+    }
+
+    .article-summary-snippet {
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      font-weight: 300;
+      margin-bottom: 24px;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .article-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.04);
+      padding-top: 16px;
+      margin-top: auto;
+    }
+
+    .btn-action-primary, .btn-action-secondary {
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-heading);
+      transition: var(--transition-smooth);
+    }
+
+    .btn-action-primary {
+      background-color: var(--btn-primary-bg);
+      border: 1px solid var(--border-color);
+      color: var(--btn-primary-text);
+    }
+
+    .btn-action-primary:hover {
+      background-color: var(--btn-primary-hover-bg);
+      border-color: var(--border-purple-hover);
+    }
+
+    .btn-action-secondary {
+      background-color: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      color: var(--text-secondary);
+      text-decoration: none;
+    }
+
+    .btn-action-secondary:hover {
+      color: var(--text-primary);
+      border-color: rgba(255, 255, 255, 0.15);
+      background-color: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Modal / Dialog Box */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(7, 8, 14, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: var(--transition-smooth);
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-container {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-purple);
+      border-radius: 20px;
+      width: 90%;
+      max-width: 700px;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 50px rgba(139, 92, 246, 0.25);
+      transform: scale(0.95);
+      transition: var(--transition-smooth);
+    }
+
+    .modal-overlay.open .modal-container {
+      transform: scale(1);
+    }
+
+    .modal-header {
+      padding: 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .modal-header-info {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .modal-title {
+      font-family: var(--font-heading);
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.4;
+    }
+
+    .btn-close-modal {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: var(--transition-smooth);
+      padding: 4px;
+    }
+
+    .btn-close-modal:hover {
+      color: var(--text-primary);
+    }
+
+    .modal-body {
+      padding: 24px;
+      overflow-y: auto;
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--text-secondary);
+    }
+
+    .modal-body h4 {
+      font-family: var(--font-heading);
+      color: var(--accent-purple-light);
+      margin-top: 20px;
+      margin-bottom: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .modal-body p {
+      margin-bottom: 16px;
+      font-weight: 300;
+    }
+
+    .modal-body ul {
+      margin-left: 20px;
+      margin-bottom: 16px;
+    }
+
+    .modal-body li {
+      margin-bottom: 8px;
+      font-weight: 300;
+    }
+
+    .modal-footer {
+      padding: 20px 24px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .btn-modal-close {
+      background-color: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+    }
+
+    .btn-modal-close:hover {
+      color: var(--text-primary);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Empty state */
+    .empty-state {
+      grid-column: span 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      text-align: center;
+      background-color: var(--bg-card);
+      border: 1px dashed var(--border-color);
+      border-radius: 16px;
+      color: var(--text-secondary);
+    }
+
+    .empty-state i {
+      width: 48px;
+      height: 48px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .empty-state h3 {
+      font-family: var(--font-heading);
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    /* Dynamic UI Styling for Columns/Panels on New Screens */
+    .two-column-layout {
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .left-control-dock {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .right-workspace-pane {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      min-height: 520px;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    .dock-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      font-weight: 700;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dock-title i {
+      width: 14px;
+      height: 14px;
+      color: var(--accent-purple-light);
+    }
+
+    .textarea-premium {
+      width: 100%;
+      height: 300px;
+      background-color: rgba(7, 8, 14, 0.4);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 14px;
+      line-height: 1.6;
+      padding: 16px;
+      resize: none;
+      transition: var(--transition-smooth);
+    }
+
+    .textarea-premium:focus {
+      outline: none;
+      border-color: var(--accent-purple);
+      box-shadow: 0 0 10px rgba(139, 92, 246, 0.15);
+    }
+
+    .btn-analysis-submit {
+      width: 100%;
+      background: linear-gradient(135deg, #1e283c, #132435);
+      border: 1px solid var(--border-purple);
+      color: var(--accent-cyan-light);
+      padding: 14px;
+      border-radius: 10px;
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: var(--transition-smooth);
+    }
+
+    .btn-analysis-submit:hover {
+      background: linear-gradient(135deg, #27344e, #1a3249);
+      border-color: var(--accent-purple-light);
+      transform: translateY(-1px);
+    }
+
+    .rule-handbook-card {
+      background-color: rgba(7, 8, 14, 0.3);
+      border: 1px dashed rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 16px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--text-secondary);
+    }
+
+    .mock-paper-select {
+      width: 100%;
+      background-color: rgba(7, 8, 14, 0.4);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    /* Syllabus Tracker Cards */
+    .syllabus-tracker-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+
+    .tracker-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 140px;
+    }
+
+    .tracker-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .tracker-card-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tracker-progress-badge {
+      background-color: rgba(139, 92, 246, 0.12);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      color: var(--accent-purple-light);
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .tracker-stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-top: 12px;
+    }
+
+    .tracker-stat-val {
+      font-family: var(--font-heading);
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .tracker-progress-container {
+      width: 100%;
+      height: 6px;
+      background-color: rgba(255, 255, 255, 0.05);
+      border-radius: 3px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+
+    .tracker-progress-bar {
+      height: 100%;
+      background: var(--gradient-primary);
+      border-radius: 3px;
+      width: 0%;
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .tracker-tip-box {
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      font-weight: 300;
+    }
+
+    .syllabus-tabs-container {
+      background-color: rgba(19, 22, 38, 0.5);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 6px;
+      display: flex;
+      gap: 6px;
+      margin-bottom: 24px;
+    }
+
+    .syllabus-tab {
+      flex: 1;
+      text-align: center;
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-family: var(--font-heading);
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+    }
+
+    .syllabus-tab.active {
+      background-color: var(--bg-card);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .syllabus-checklist-item {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 16px;
+      transition: var(--transition-smooth);
+    }
+
+    .syllabus-checklist-item:hover {
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .checklist-row-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .checkbox-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .checkbox-container input {
+      display: none;
+    }
+
+    .custom-checkbox {
+      width: 20px;
+      height: 20px;
+      border: 2.5px solid var(--border-color);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition-smooth);
+      color: transparent;
+    }
+
+    .checkbox-container:hover .custom-checkbox {
+      border-color: var(--accent-purple-light);
+    }
+
+    .checkbox-container input:checked + .custom-checkbox {
+      background-color: var(--accent-purple);
+      border-color: var(--accent-purple);
+      color: var(--text-primary);
+    }
+
+    .checklist-subtopic-tag {
+      background-color: rgba(6, 182, 212, 0.08);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      color: var(--accent-cyan-light);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .checklist-news-badge {
+      background-color: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .checklist-topic-title {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-left: 32px;
+      line-height: 1.5;
+    }
+
+    .checklist-linked-docs {
+      margin-left: 32px;
+      margin-top: 16px;
+      border-top: 1px dashed rgba(255, 255, 255, 0.06);
+      padding-top: 14px;
+    }
+
+    .linked-docs-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .linked-doc-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .linked-doc-item::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background-color: var(--accent-cyan-light);
+      border-radius: 1px;
+    }
+
+    /* AI Mentor Chat Interface */
+    .chat-container {
+      width: 100%;
+      height: calc(100vh - 380px);
+      min-height: 250px;
+      background-color: var(--chat-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      margin-bottom: 16px;
+    }
+
+    .chat-bubble {
+      display: flex;
+      gap: 16px;
+      max-width: 80%;
+      animation: bubbleIn 0.3s ease;
+    }
+
+    @keyframes bubbleIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .chat-bubble.assistant {
+      align-self: flex-start;
+    }
+
+    .chat-bubble.user {
+      align-self: flex-end;
+      flex-direction: row-reverse;
+    }
+
+    .chat-avatar {
+      width: 36px;
+      height: 36px;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-purple);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-purple-light);
+      flex-shrink: 0;
+    }
+
+    .chat-bubble.user .chat-avatar {
+      background-color: var(--accent-purple);
+      color: var(--text-primary);
+      border: none;
+    }
+
+    .chat-message-content {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 16px 20px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--text-secondary);
+    }
+
+    .chat-bubble.user .chat-message-content {
+      background-color: var(--accent-purple);
+      color: #ffffff !important;
+      border: none;
+    }
+
+    .suggested-qs-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .suggested-q-btn {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      text-align: left;
+      transition: var(--transition-smooth);
+    }
+
+    .suggested-q-btn:hover {
+      border-color: var(--accent-purple);
+      background-color: rgba(139, 92, 246, 0.05);
+      color: var(--text-primary);
+    }
+
+    .chat-input-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 8px 12px;
+    }
+
+    .chat-input-bar textarea {
+      flex: 1;
+      background: none;
+      border: none;
+      outline: none;
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 14px;
+      resize: none;
+      height: 36px;
+      line-height: 36px;
+      padding: 0 4px;
+    }
+
+    .btn-chat-send {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      border: 1px solid var(--border-purple);
+      background: none;
+      color: var(--accent-purple-light);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition-smooth);
+    }
+
+    .btn-chat-send:hover {
+      background-color: var(--accent-purple);
+      color: white;
+      border: none;
+    }
+
+    /* FULLSCREEN FOCUS MODE overlay */
+    .focus-mode-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: var(--bg-darkest);
+      z-index: 10000;
+      display: none;
+      grid-template-columns: 1fr 500px;
+      padding: 40px;
+      gap: 40px;
+      animation: focusFadeIn 0.5s ease;
+    }
+
+    .focus-mode-overlay.open {
+      display: grid;
+    }
+
+    @keyframes focusFadeIn {
+      from { opacity: 0; filter: blur(5px); }
+      to { opacity: 1; filter: none; }
+    }
+
+    .focus-left-pane {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+    }
+
+    .focus-right-pane {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .focus-top-bar {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .btn-exit-focus {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: var(--font-heading);
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition-smooth);
+    }
+
+    .btn-exit-focus:hover {
+      background-color: var(--bg-card-hover);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .focus-mode-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background-color: rgba(139, 92, 246, 0.08);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      color: var(--accent-purple-light);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-family: var(--font-heading);
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .pomodoro-circle-container {
+      position: relative;
+      width: 320px;
+      height: 320px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: auto;
+    }
+
+    .pomodoro-ring {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 6px solid var(--bg-card);
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .pomodoro-ring-active {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 6px solid transparent;
+      border-top-color: var(--accent-cyan);
+      transform: rotate(0deg);
+      transition: transform 1s linear;
+      filter: drop-shadow(0 0 15px rgba(6, 182, 212, 0.3));
+    }
+
+    .pomodoro-text {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      z-index: 10;
+    }
+
+    .pomodoro-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--accent-cyan);
+      font-weight: 700;
+    }
+
+    .pomodoro-time {
+      font-family: var(--font-heading);
+      font-size: 64px;
+      font-weight: 800;
+      color: var(--text-primary);
+      letter-spacing: -1px;
+      text-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+    }
+
+    .pomodoro-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .pomodoro-controls {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 24px;
+      margin-bottom: auto;
+    }
+
+    .btn-pomo-primary {
+      background-color: rgba(139, 92, 246, 0.15);
+      border: 1px solid var(--accent-purple);
+      color: var(--accent-purple-light);
+      padding: 12px 32px;
+      border-radius: 12px;
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition-smooth);
+    }
+
+    .btn-pomo-primary:hover {
+      background-color: var(--accent-purple);
+      color: white;
+    }
+
+    .btn-pomo-reset {
+      width: 44px;
+      height: 44px;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      border-radius: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition-smooth);
+    }
+
+    .btn-pomo-reset:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+      color: var(--text-primary);
+    }
+
+    /* Soundscapes Synthesizer cards */
+    .soundscape-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 18px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+    }
+
+    .soundscape-card:hover {
+      border-color: rgba(255, 255, 255, 0.12);
+      background-color: var(--bg-card-hover);
+    }
+
+    .soundscape-card.active {
+      border-color: var(--accent-purple);
+      background-color: rgba(139, 92, 246, 0.04);
+    }
+
+    .soundscape-info h4 {
+      font-family: var(--font-heading);
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+
+    .soundscape-card.active .soundscape-info h4 {
+      color: var(--accent-purple-light);
+    }
+
+    .soundscape-info p {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .soundscape-icon {
+      color: var(--text-muted);
+      transition: var(--transition-smooth);
+    }
+
+    .soundscape-card:hover .soundscape-icon {
+      color: var(--text-secondary);
+    }
+
+    .soundscape-card.active .soundscape-icon {
+      color: var(--accent-purple-light);
+      animation: soundPulse 1.5s infinite ease-in-out;
+    }
+
+    @keyframes soundPulse {
+      0%, 100% { transform: scale(1); opacity: 0.7; }
+      50% { transform: scale(1.15); opacity: 1; }
+    }
+
+    .focus-quote-card {
+      background-color: rgba(19, 22, 38, 0.3);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: auto;
+    }
+
+    .quote-text {
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      font-style: italic;
+      font-weight: 300;
+    }
+
+    .quote-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--accent-cyan-light);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* MOCK EXAM INTERACTIVE VIEW */
+    .mock-exam-question-box {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .mock-q-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding-bottom: 12px;
+    }
+
+    .mock-q-title {
+      font-family: var(--font-heading);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.5;
+    }
+
+    .mock-options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .mock-option-item {
+      background-color: var(--option-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 14px;
+      line-height: 1.5;
+      transition: var(--transition-smooth);
+    }
+
+    .mock-option-item:hover {
+      border-color: rgba(255, 255, 255, 0.12);
+      background-color: rgba(255, 255, 255, 0.02);
+    }
+
+    .mock-option-letter {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 12px;
+      color: var(--text-secondary);
+      flex-shrink: 0;
+    }
+
+    .mock-option-item.correct {
+      border-color: #10b981;
+      background-color: rgba(16, 185, 129, 0.05);
+    }
+
+    .mock-option-item.correct .mock-option-letter {
+      background-color: #10b981;
+      color: white;
+      border: none;
+    }
+
+    .mock-option-item.incorrect {
+      border-color: #ef4444;
+      background-color: rgba(239, 68, 68, 0.05);
+    }
+
+    .mock-option-item.incorrect .mock-option-letter {
+      background-color: #ef4444;
+      color: white;
+      border: none;
+    }
+
+    .mock-explanation-box {
+      background-color: rgba(6, 182, 212, 0.04);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: 10px;
+      padding: 18px;
+      font-size: 13.5px;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      animation: fadeIn 0.3s ease;
+    }
+
+    .mock-btn-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 10px;
+    }
+
+    /* Interactive Analysis Outputs */
+    .analysis-results-box {
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .analysis-header {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding-bottom: 16px;
+    }
+
+    .analysis-section-title {
+      font-family: var(--font-heading);
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--accent-purple-light);
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    .analysis-bullet {
+      display: flex;
+      gap: 10px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .analysis-bullet i {
+      width: 16px;
+      height: 16px;
+      margin-top: 3px;
+      flex-shrink: 0;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 1100px) {
+      .two-column-layout {
+        grid-template-columns: 1fr;
+      }
+      .syllabus-tracker-grid {
+        grid-template-columns: 1fr;
+      }
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .articles-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      aside {
+        transform: translateX(-100%);
+      }
+      main {
+        margin-left: 0;
+        padding: 20px;
+        width: 100%;
+      }
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      .focus-mode-overlay {
+        grid-template-columns: 1fr;
+        overflow-y: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar / Navigation Panel -->
+  <aside id="app-sidebar">
+    <div>
+      <div class="brand-section">
+        <div class="brand-logo">
+          <i data-lucide="sparkles"></i>
+        </div>
+        <div class="brand-info">
+          <h2>Aspirant Portal</h2>
+          <p>Rank #42 Progress</p>
+        </div>
+      </div>
+
+      <nav>
+        <div class="nav-item active" id="nav-dashboard" onclick="switchTab('dashboard')">
+          <i data-lucide="layout-dashboard"></i>
+          <span>Dashboard</span>
+        </div>
+        <div class="nav-item" id="nav-tests" onclick="switchTab('tests')">
+          <i data-lucide="help-circle"></i>
+          <span>Mock Tests</span>
+        </div>
+        <div class="nav-item" id="nav-mentor" onclick="switchTab('mentor')">
+          <i data-lucide="brain"></i>
+          <span>AI Mentor</span>
+        </div>
+        <div class="nav-item" id="theme-toggle-btn" onclick="toggleTheme()" style="margin-top: 16px; border-top: 1px dashed var(--border-color); padding-top: 16px;">
+          <i data-lucide="sun" id="theme-icon"></i>
+          <span id="theme-text">Light Theme</span>
+        </div>
+      </nav>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="btn-focus" onclick="toggleFocusMode(true)">
+        <i data-lucide="zap"></i>
+        <span>Start Focus Mode</span>
+      </button>
+      <div class="nav-item" id="nav-settings" onclick="switchTab('settings')">
+        <i data-lucide="settings"></i>
+        <span>Settings</span>
+      </div>
+      <div class="nav-item" id="nav-support" onclick="switchTab('support')">
+        <i data-lucide="life-buoy"></i>
+        <span>Support</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content Dashboard -->
+  <main id="main-content">
+    
+    <!-- ==============================================
+         1. DASHBOARD VIEW (Root Current Affairs)
+         ============================================== -->
+    <section id="section-dashboard" class="page-section active">
+      <header class="header-dashboard">
+        <div class="header-title-container">
+          <h1>AI Current Affairs Dashboard</h1>
+          <p class="header-subtitle">Automated UPSC-focused AI news analysis platform</p>
+        </div>
+
+        <div class="header-meta">
+          <div class="meta-item">
+            <span class="meta-value" id="header-total-count">0</span>
+            <span class="meta-label">Total Articles</span>
+          </div>
+          <div class="divider"></div>
+          <div class="meta-item">
+            <span class="meta-value cyan-text" id="header-relative-time">Loading...</span>
+            <span class="meta-label">Last Updated</span>
+          </div>
+        </div>
+      </header>
+
+      <section class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-header">
+            <div class="stat-icon">
+              <i data-lucide="file-text"></i>
+            </div>
+            <span class="badge-today" id="badge-count">+0 Today</span>
+          </div>
+          <div class="stat-info">
+            <h3 id="stat-articles">0</h3>
+            <p>Total Articles</p>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-header">
+            <div class="stat-icon">
+              <i data-lucide="globe"></i>
+            </div>
+          </div>
+          <div class="stat-info">
+            <h3 id="stat-sources">0</h3>
+            <p>Sources Covered</p>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-header">
+            <div class="stat-icon">
+              <i data-lucide="cpu"></i>
+            </div>
+          </div>
+          <div class="stat-info">
+            <h3>98%</h3>
+            <p>AI Confidence Score</p>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-header">
+            <div class="stat-icon cyan-style">
+              <i data-lucide="refresh-cw"></i>
+            </div>
+          </div>
+          <div class="stat-info">
+            <h3 id="stat-status">Running</h3>
+            <p>Processing Status</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="controls-bar">
+        <div class="search-filter-wrapper">
+          <div class="search-box">
+            <i data-lucide="search"></i>
+            <input type="text" id="search-input" placeholder="Search daily current affairs..." oninput="filterArticles()">
+          </div>
+        </div>
+
+        <div class="category-tabs">
+          <button class="tab-btn active" onclick="selectCategory(this, 'all')">All Categories</button>
+          <button class="tab-btn" onclick="selectCategory(this, 'polity')">Polity</button>
+          <button class="tab-btn" onclick="selectCategory(this, 'economy')">Economy</button>
+          <button class="tab-btn" onclick="selectCategory(this, 'science')">Science</button>
+          <button class="tab-btn" onclick="selectCategory(this, 'environment')">Environment</button>
+          <button class="tab-btn" onclick="selectCategory(this, 'general')">General</button>
+        </div>
+
+        <select class="source-select" id="source-select" onchange="filterArticles()">
+          <option value="all">All Sources</option>
+          <option value="The Hindu">The Hindu</option>
+          <option value="Indian Express">Indian Express</option>
+        </select>
+      </section>
+
+      <section class="articles-grid" id="articles-grid">
+        <!-- Generated by JavaScript -->
+      </section>
+    </section>
+
+    <!-- ==============================================
+         3. MOCK TESTS VIEW
+         ============================================== -->
+    <section id="section-tests" class="page-section">
+      <header class="header-dashboard">
+        <div class="header-title-container">
+          <h1>UPSC Current Mock Tests</h1>
+          <p class="header-subtitle">Challenge your readiness with dynamic GS multiple-choice tests drafted with the strict depth of UPSC Prelims questions.</p>
+        </div>
+      </header>
+
+      <div class="two-column-layout">
+        <div class="left-control-dock">
+          <span class="dock-title"><i data-lucide="clock"></i> Exam Settings</span>
+          
+          <div>
+            <label class="dock-title" style="margin-bottom:6px;">Topic/Paper Association</label>
+            <select class="mock-paper-select" id="mock-topic-select">
+              <option value="gs2">GS-II: Polity, Governance & IR</option>
+              <option value="gs3">GS-III: Economy & Technology</option>
+              <option value="gs1">GS-I: Geography & Environment</option>
+            </select>
+          </div>
+
+          <div class="rule-handbook-card">
+            <div class="dock-title" style="margin-bottom:4px; color: var(--accent-purple-light);">Rule Handbook</div>
+            5 MCQs covering current affairs and static links. No negative markings applied here. Focus on precise accuracy.
+          </div>
+
+          <button class="btn-focus" style="width:100%; border-radius:10px; padding:14px;" onclick="startMockTest()">
+            <i data-lucide="play"></i>
+            <span>Start Mock Test</span>
+          </button>
+        </div>
+
+        <div class="right-workspace-pane" id="mock-workspace">
+          <div class="empty-state" style="border:none; background:none;">
+            <i data-lucide="help-circle" style="color: var(--text-muted); width:48px; height:48px;"></i>
+            <h3>Test Registry Blank</h3>
+            <p style="max-width:300px; margin-top:6px;">Select your desired GS Paper on the left control dock and click "Start Mock Test" to begin.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==============================================
+         5. AI MENTOR VIEW
+         ============================================== -->
+    <section id="section-mentor" class="page-section">
+      <header class="header-dashboard compact-header">
+        <div class="header-title-container">
+          <h1>AI UPSC Mentor</h1>
+          <p class="header-subtitle">Your personalized civil services guidance platform, trained on GS evaluation frameworks and statutory documents.</p>
+        </div>
+      </header>
+
+      <div class="chat-container" id="chat-scroller">
+        <!-- System Welcome Message -->
+        <div class="chat-bubble assistant">
+          <div class="chat-avatar">
+            <i data-lucide="sparkles" style="width:16px; height:16px;"></i>
+          </div>
+          <div class="chat-message-content">
+            Hello, Aspirant! I am your AI UPSC IAS Mentor—trained on key statutory frameworks, standard GS parameters, and answer evaluation matrices.
+            <br><br>
+            How is your study tracking progressing today? Feel free to ask technical doubts on any current affairs theme, request an answer skeleton model, or click a suggested question below to start in flow-state!
+          </div>
+        </div>
+      </div>
+
+      <div class="suggested-qs-row">
+        <button class="suggested-q-btn" onclick="triggerSuggestedQ('How do I balance dynamic current affairs with static GS textbook study?')">
+          How do I balance dynamic current affairs with static GS textbook study?
+        </button>
+        <button class="suggested-q-btn" onclick="triggerSuggestedQ('Show me a standard high-scoring answer format for GS-II (Polity) essays.')">
+          Show me a standard high-scoring answer format for GS-II (Polity) essays.
+        </button>
+        <button class="suggested-q-btn" onclick="triggerSuggestedQ('Explain in simple terms why the RBI Repo Rate is maintained at 6.5%.')">
+          Explain in simple terms why the RBI Repo Rate is maintained at 6.5%.
+        </button>
+        <button class="suggested-q-btn" onclick="triggerSuggestedQ('How can I effectively link GS-III Environmental current affairs to static geography concepts?')">
+          How can I effectively link GS-III Environmental current affairs to static geography concepts?
+        </button>
+      </div>
+
+      <div class="chat-input-bar">
+        <textarea id="chat-textarea" placeholder="Type your civil service academic guidelines or doubts here..." onkeydown="handleChatKeydown(event)"></textarea>
+        <button class="btn-chat-send" onclick="sendChatMessage()">
+          <i data-lucide="send"></i>
+        </button>
+      </div>
+    </section>
+
+    <!-- ==============================================
+         6. SETTINGS VIEW (Interactive Mock)
+         ============================================== -->
+    <section id="section-settings" class="page-section">
+      <header class="header-dashboard">
+        <div class="header-title-container">
+          <h1>Portal Settings</h1>
+          <p class="header-subtitle">Manage your local storage, LLM credentials, and AWS Bedrock model IDs.</p>
+        </div>
+      </header>
+      <div class="left-control-dock" style="max-width:600px;">
+        <span class="dock-title"><i data-lucide="cpu"></i> Model Configuration</span>
+        <div style="margin-top:10px;">
+          <label class="dock-title" style="margin-bottom:6px;">Target LLM Model</label>
+          <input type="text" class="mock-paper-select" value="meta.llama3-8b-instruct-v1:0" style="cursor:text;" readonly>
+        </div>
+        <div style="margin-top:10px;">
+          <label class="dock-title" style="margin-bottom:6px;">Local Cache Size</label>
+          <p style="font-size:14px; color:var(--text-secondary);">Currently serving <span id="settings-cache-count">0</span> items.</p>
+        </div>
+        <button class="btn-analysis-submit" onclick="alert('Configuration updated locally!')" style="color:var(--text-primary); margin-top:20px;">Save Settings</button>
+      </div>
+    </section>
+
+    <!-- ==============================================
+         7. SUPPORT VIEW (Interactive Mock)
+         ============================================== -->
+    <section id="section-support" class="page-section">
+      <header class="header-dashboard">
+        <div class="header-title-container">
+          <h1>Aspirant Helpdesk</h1>
+          <p class="header-subtitle">Raise prep support issues or learn more about the Llama3 & Bedrock pipeline.</p>
+        </div>
+      </header>
+      <div class="left-control-dock" style="max-width:600px;">
+        <span class="dock-title"><i data-lucide="life-buoy"></i> Technical FAQs</span>
+        <div class="rule-handbook-card" style="margin-top:10px; display:flex; flex-direction:column; gap:12px;">
+          <div>
+            <strong style="color:var(--accent-purple-light);">How does the pipeline process headlines?</strong>
+            <p style="font-size:13px; color:var(--text-secondary); margin-top:4px;">Our RSS fetcher checks articles every hour, parses content using Newspaper3k, and runs Bedrock summaries in parallel.</p>
+          </div>
+          <div>
+            <strong style="color:var(--accent-purple-light);">Is my study data secure?</strong>
+            <p style="font-size:13px; color:var(--text-secondary); margin-top:4px;">Yes, all syllabus trackers, focus logs, and mock scores are kept exclusively in local client-side memory.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==============================================
+       FULLSCREEN FOCUS STATE WORKSPACE
+       ============================================== -->
+  <section class="focus-mode-overlay" id="focus-workspace">
+    <div class="focus-left-pane">
+      <div class="focus-top-bar">
+        <button class="btn-exit-focus" onclick="toggleFocusMode(false)">
+          <i data-lucide="arrow-left"></i>
+          <span>Exit Focus State</span>
+        </button>
+        <div class="focus-mode-status">
+          <i data-lucide="book-open" style="width:14px; height:14px; margin-right:4px;"></i>
+          <span>IAS Deep Flow Mode Active</span>
+        </div>
+      </div>
+
+      <!-- POMODORO TIMER DOCK -->
+      <div class="pomodoro-circle-container">
+        <div class="pomodoro-ring"></div>
+        <div class="pomodoro-ring-active" id="pomo-ring-glow"></div>
+        <div class="pomodoro-text">
+          <span class="pomodoro-label">Study Session</span>
+          <span class="pomodoro-time" id="pomo-clock">25:00</span>
+          <span class="pomodoro-sub" id="pomo-status">Interval Stalled</span>
+        </div>
+      </div>
+
+      <div class="pomodoro-controls">
+        <button class="btn-pomo-primary" id="btn-pomo-play" onclick="triggerPomoTimer()">
+          <i data-lucide="play"></i>
+          <span>Resume</span>
+        </button>
+        <button class="btn-pomo-reset" onclick="resetPomoTimer()">
+          <i data-lucide="rotate-ccw"></i>
+        </button>
+      </div>
+
+      <!-- Custom duration input for tailored study session lengths -->
+      <div style="margin-top: 28px; display: flex; align-items: center; gap: 10px; background-color: var(--bg-card); border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 12px; transition: var(--transition-smooth); box-shadow: var(--card-shadow-hover);">
+        <span style="font-size: 13px; color: var(--text-secondary); font-weight: 600;">Session Length:</span>
+        <input type="number" id="custom-pomo-minutes" min="1" max="180" value="25" style="width: 64px; background-color: var(--bg-darkest); border: 1px solid var(--border-color); color: var(--text-primary); padding: 5px 8px; border-radius: 8px; text-align: center; font-family: var(--font-heading); font-size: 14px; font-weight: 700; outline: none;" onchange="updateCustomPomoDuration()">
+        <span style="font-size: 13px; color: var(--text-muted); font-weight: 500;">mins</span>
+      </div>
+    </div>
+
+    <!-- FOCUS AMBIENT SOUNDSCAPES & MOTIVATION PANEL -->
+    <div class="focus-right-pane">
+      <div class="left-control-dock" style="border:none; padding:0; background:none;">
+        <span class="dock-title" style="margin-bottom:12px; color: var(--accent-purple-light);"><i data-lucide="volume-2"></i> Soundscape Synthesizers</span>
+        
+        <div class="soundscape-card" id="synth-drone" onclick="toggleSoundscape('drone')">
+          <div class="soundscape-info">
+            <h4>Deep Drone</h4>
+            <p>Sub-bass sawtooth block mapping cozy ambient drone</p>
+          </div>
+          <i data-lucide="volume-2" class="soundscape-icon"></i>
+        </div>
+        <br>
+        <div class="soundscape-card" id="synth-binaural" onclick="toggleSoundscape('binaural')">
+          <div class="soundscape-info">
+            <h4>Binaural Study</h4>
+            <p>Alpha-beat stereo frequencies designed for focus alignment</p>
+          </div>
+          <i data-lucide="volume-2" class="soundscape-icon"></i>
+        </div>
+        <br>
+        <div class="soundscape-card" id="synth-rain" onclick="toggleSoundscape('rain')">
+          <div class="soundscape-info">
+            <h4>Zen Rain</h4>
+            <p>Bandpassed synthesized high static replicating soft forest rain</p>
+          </div>
+          <i data-lucide="volume-2" class="soundscape-icon"></i>
+        </div>
+      </div>
+
+      <div class="focus-quote-card">
+        <span class="quote-label"><i data-lucide="sparkles"></i> Motivation for UPSC Civil Servants</span>
+        <p class="quote-text">"To succeed in your mission, you must have single-minded devotion to your goal. — Dr. A.P.J. Abdul Kalam"</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Detailed Summary Dialog Overlay -->
+  <div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+    <div class="modal-container">
+      <div class="modal-header">
+        <div class="modal-header-info">
+          <span class="source-tag" id="modal-source">Source</span>
+          <h3 class="modal-title" id="modal-title">Article Title</h3>
+        </div>
+        <button class="btn-close-modal" onclick="closeModalDirect()">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="modal-body" id="modal-body">
+        <!-- Content will be fully formatted with HTML paragraphs by JS -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn-modal-close" onclick="closeModalDirect()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive JavaScript Logic -->
+  <script>
+    let globalArticles = [];
+    let selectedCategory = 'all';
+    let savedBookmarks = JSON.parse(localStorage.getItem('upsc_bookmarks') || '[]');
+    
+    // Lucide Icons initialization
+    document.addEventListener("DOMContentLoaded", () => {
+      // Apply theme on bootup
+      const savedTheme = localStorage.getItem('upsc_portal_theme') || 'dark';
+      if (savedTheme === 'light') {
+        document.body.classList.add('light-theme');
+        const iconEl = document.getElementById('theme-icon');
+        const textEl = document.getElementById('theme-text');
+        if (iconEl) iconEl.setAttribute('data-lucide', 'moon');
+        if (textEl) textEl.textContent = 'Dark Theme';
+      }
+      
+      lucide.createIcons();
+      fetchNewsData();
+      
+      // Auto refresh dynamic elements
+      setInterval(updateRelativeTime, 60000);
+    });
+
+    // Tab Switching Logic
+    function switchTab(target) {
+      // Manage nav active classes
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+      const activeNav = document.getElementById(`nav-${target}`);
+      if (activeNav) activeNav.classList.add('active');
+
+      // Manage section visibility
+      document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
+      const activeSec = document.getElementById(`section-${target}`);
+      if (activeSec) activeSec.classList.add('active');
+    }
+
+    // Toggle Bookmarks locally
+    function toggleBookmark(e, title) {
+      e.stopPropagation();
+      const idx = savedBookmarks.indexOf(title);
+      if (idx > -1) {
+        savedBookmarks.splice(idx, 1);
+        e.currentTarget.classList.remove('active');
+      } else {
+        savedBookmarks.push(title);
+        e.currentTarget.classList.add('active');
+      }
+      localStorage.setItem('upsc_bookmarks', JSON.stringify(savedBookmarks));
+      document.getElementById('settings-cache-count').textContent = savedBookmarks.length;
+    }
+
+    // Fetch news from FastAPI
+    let generationTime = null;
+    function fetchNewsData() {
+      fetch('/latest-news')
+        .then(response => {
+          if (!response.ok) throw new Error("API Offline or Unreachable");
+          return response.json();
+        })
+        .then(data => {
+          if (data.error) {
+            showEmptyState("No Summary Data Available", "Please trigger the main.py pipeline to run the current affairs collector.");
+            document.getElementById('stat-status').textContent = 'Idle';
+            document.getElementById('header-relative-time').textContent = 'N/A';
+            return;
+          }
+          
+          globalArticles = data.articles || [];
+          generationTime = data.generated_at;
+          
+          // Update stats
+          document.getElementById('header-total-count').textContent = globalArticles.length;
+          document.getElementById('stat-articles').textContent = globalArticles.length;
+          document.getElementById('badge-count').textContent = `+${globalArticles.length} Today`;
+          document.getElementById('stat-status').textContent = 'Active';
+          document.getElementById('settings-cache-count').textContent = savedBookmarks.length;
+          
+          const uniqueSources = new Set(globalArticles.map(a => a.source));
+          document.getElementById('stat-sources').textContent = uniqueSources.size || 2;
+          
+          updateRelativeTime();
+          renderArticles(globalArticles);
+        })
+        .catch(err => {
+          console.error(err);
+          showEmptyState("Connection Timeout", "Make sure your FastAPI server is running locally (uvicorn app.ui.api:app --reload)");
+          document.getElementById('stat-status').textContent = 'Offline';
+          document.getElementById('header-relative-time').textContent = 'Failed';
+        });
+    }
+
+    // Relative timestamp renderer
+    function updateRelativeTime() {
+      if (!generationTime) return;
+      let targetDate;
+      if (generationTime.includes('_')) {
+        const parts = generationTime.split('_');
+        const dateParts = parts[0].split('-');
+        const timeParts = parts[1].split('-');
+        targetDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2], timeParts[0], timeParts[1], timeParts[2]);
+      } else {
+        targetDate = new Date(generationTime);
+      }
+      
+      const diffMs = new Date() - targetDate;
+      const diffMins = Math.floor(diffMs / 60000);
+      const element = document.getElementById('header-relative-time');
+      
+      if (diffMins < 1) {
+        element.textContent = "Just now";
+      } else if (diffMins < 60) {
+        element.textContent = `${diffMins} min${diffMins > 1 ? 's' : ''} ago`;
+      } else {
+        const hours = Math.floor(diffMins / 60);
+        element.textContent = `${hours} hour${hours > 1 ? 's' : ''} ago`;
+      }
+    }
+
+    // Show empty state inside grid
+    function showEmptyState(title, description) {
+      const grid = document.getElementById('articles-grid');
+      grid.innerHTML = `
+        <div class="empty-state">
+          <i data-lucide="cloud-off"></i>
+          <h3>${title}</h3>
+          <p style="max-width:350px; margin-top:6px;">${description}</p>
+        </div>
+      `;
+      lucide.createIcons();
+    }
+
+    // Render articles grid
+    function renderArticles(list) {
+      const grid = document.getElementById('articles-grid');
+      grid.innerHTML = '';
+      
+      if (list.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-state">
+            <i data-lucide="folder-open"></i>
+            <h3>No UPSC Insights Match</h3>
+            <p>Try clearing your search query or choosing a different category.</p>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+      
+      list.forEach((article, index) => {
+        const dateStr = article.publish_date && article.publish_date !== 'None' ? 
+          new Date(article.publish_date).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'}) : 
+          'Oct 24, 2023';
+
+        const isBookmarked = savedBookmarks.includes(article.title) ? 'active' : '';
+
+        const card = document.createElement('article');
+        card.className = 'article-card';
+        card.innerHTML = `
+          <div>
+            <div class="article-card-header">
+              <span class="source-tag">${article.source}</span>
+              <div style="display:flex; align-items:center; gap:12px;">
+                <span class="article-date">${dateStr}</span>
+                <button class="btn-bookmark ${isBookmarked}" onclick="toggleBookmark(event, '${article.title.replace(/'/g, "\\'")}')">
+                  <i data-lucide="bookmark"></i>
+                </button>
+              </div>
+            </div>
+            
+            <h3 class="article-title">${article.title}</h3>
+            <p class="article-summary-snippet">${article.summary}</p>
+          </div>
+
+          <div class="article-actions">
+            <button class="btn-action-primary" onclick="openFullSummary(${index})">
+              <i data-lucide="book-open"></i>
+              <span>Read Full Summary</span>
+            </button>
+            <a href="${article.link}" target="_blank" class="btn-action-secondary">
+              <span>Open Article</span>
+              <i data-lucide="external-link" style="width:14px; height:14px;"></i>
+            </a>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+      lucide.createIcons();
+    }
+
+    // Select category tabs
+    function selectCategory(btn, category) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedCategory = category;
+      filterArticles();
+    }
+
+    // Keyword filtering
+    function filterArticles() {
+      const searchVal = document.getElementById('search-input').value.toLowerCase();
+      const sourceVal = document.getElementById('source-select').value;
+
+      const filtered = globalArticles.filter(article => {
+        let categoryMatches = true;
+        if (selectedCategory !== 'all') {
+          const textToSearch = (article.title + " " + article.summary).toLowerCase();
+          if (selectedCategory === 'polity') {
+            categoryMatches = textToSearch.includes('supreme court') || textToSearch.includes('verdict') || 
+                              textToSearch.includes('election') || textToSearch.includes('polity') || 
+                              textToSearch.includes('parliament') || textToSearch.includes('court') || 
+                              textToSearch.includes('scheme') || textToSearch.includes('policy');
+          } else if (selectedCategory === 'economy') {
+            categoryMatches = textToSearch.includes('bank') || textToSearch.includes('rbi') || 
+                              textToSearch.includes('repo') || textToSearch.includes('rate') || 
+                              textToSearch.includes('economy') || textToSearch.includes('budget') || 
+                              textToSearch.includes('inflation');
+          } else if (selectedCategory === 'science') {
+            categoryMatches = textToSearch.includes('isro') || textToSearch.includes('nasa') || 
+                              textToSearch.includes('mission') || textToSearch.includes('science') || 
+                              textToSearch.includes('technology') || textToSearch.includes('space') || 
+                              textToSearch.includes('satellite');
+          } else if (selectedCategory === 'environment') {
+            categoryMatches = textToSearch.includes('climate') || textToSearch.includes('environment') || 
+                              textToSearch.includes('green') || textToSearch.includes('forest') || 
+                              textToSearch.includes('pollution') || textToSearch.includes('cop');
+          } else if (selectedCategory === 'general') {
+            categoryMatches = !textToSearch.includes('rbi') && !textToSearch.includes('court') && 
+                              !textToSearch.includes('isro') && !textToSearch.includes('climate');
+          }
+        }
+        const sourceMatches = sourceVal === 'all' || article.source === sourceVal;
+        const searchMatches = article.title.toLowerCase().includes(searchVal) || 
+                              article.summary.toLowerCase().includes(searchVal);
+
+        return categoryMatches && sourceMatches && searchMatches;
+      });
+      renderArticles(filtered);
+    }
+
+    // Modal popup full summaries
+    function openFullSummary(index) {
+      const article = globalArticles[index];
+      document.getElementById('modal-source').textContent = article.source;
+      document.getElementById('modal-title').textContent = article.title;
+      
+      const body = document.getElementById('modal-body');
+      let formattedSummary = '';
+      
+      let rawText = article.summary.trim();
+      
+      // Retroactive Parser: split massive blocks into spaced paragraphs dynamically after every 2 sentences
+      if (!rawText.includes('\n') && rawText.length > 150) {
+        const sentences = rawText.match(/[^.!?]+[.!?]+(\s+|$)/g) || [rawText];
+        let paragraphText = "";
+        
+        for (let i = 0; i < sentences.length; i++) {
+          paragraphText += sentences[i];
+          if ((i + 1) % 2 === 0 && i !== sentences.length - 1) {
+            paragraphText += "\n\n";
+          }
+        }
+        rawText = paragraphText.trim();
+      }
+      
+      // Bold syntax conversion (**text** -> <strong>text</strong>)
+      rawText = rawText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      
+      const lines = rawText.split('\n');
+      let inList = false;
+      
+      lines.forEach(line => {
+        const trimmed = line.trim();
+        if (!trimmed) return;
+        
+        // Bullet list item check
+        if (trimmed.startsWith('* ') || trimmed.startsWith('- ') || trimmed.startsWith('• ')) {
+          if (!inList) {
+            formattedSummary += '<ul style="margin-left: 20px; margin-bottom: 14px; list-style-type: disc;">';
+            inList = true;
+          }
+          const itemText = trimmed.replace(/^[\*\-•]\s+/, '').trim();
+          formattedSummary += `<li style="margin-bottom: 8px; line-height: 1.7; color: var(--text-secondary);">${itemText}</li>`;
+        } else {
+          if (inList) {
+            formattedSummary += '</ul>';
+            inList = false;
+          }
+          // Paragraph line
+          formattedSummary += `<p style="margin-bottom: 16px; line-height: 1.75; color: var(--text-secondary); font-weight: 300;">${trimmed}</p>`;
+        }
+      });
+      
+      if (inList) formattedSummary += '</ul>';
+      
+      body.innerHTML = formattedSummary;
+      document.getElementById('modal-overlay').classList.add('open');
+    }
+
+    function closeModalDirect() {
+      document.getElementById('modal-overlay').classList.remove('open');
+    }
+
+    function closeModal(e) {
+      if (e.target.id === 'modal-overlay') {
+        closeModalDirect();
+      }
+    }
+
+
+
+    // ==============================================
+    // MOCK EXAM SIMULATOR FUNCTIONS
+    // ==============================================
+    let mockQuestions = [];
+    let currentMockQuestionIdx = 0;
+    let mockScore = 0;
+
+    function startMockTest() {
+      const topic = document.getElementById('mock-topic-select').value;
+      const workspace = document.getElementById('mock-workspace');
+      
+      workspace.innerHTML = `
+        <div style="text-align: center; padding: 60px 20px;">
+          <div style="width: 48px; height: 48px; border: 4px solid rgba(139, 92, 246, 0.15); border-top-color: var(--accent-purple); border-radius: 50%; animation: soundPulse 1s linear infinite; margin: 0 auto 20px auto;"></div>
+          <h3 style="font-family: var(--font-heading); color: var(--text-primary); margin-bottom: 8px;">UPSC AI MCQ Desk Active</h3>
+          <p style="color: var(--text-secondary); max-width: 320px; margin: 0 auto; font-size: 14px; font-weight: 300; line-height: 1.6;">
+            Analyzing database articles and drafting premium UPSC-style statement evaluations...
+          </p>
+        </div>
+      `;
+
+      fetch(`/generate-mock?topic=${topic}`)
+        .then(response => {
+          if (!response.ok) throw new Error("Backend Offline");
+          return response.json();
+        })
+        .then(data => {
+          mockQuestions = data.questions || [];
+          currentMockQuestionIdx = 0;
+          mockScore = 0;
+          
+          if (mockQuestions.length === 0) {
+            workspace.innerHTML = `
+              <div class="empty-state" style="border:none; background:none;">
+                <i data-lucide="help-circle" style="color: var(--text-muted); width:48px; height:48px;"></i>
+                <h3>No mock questions generated</h3>
+                <p>Could not generate dynamic questions. Please try again.</p>
+              </div>
+            `;
+            lucide.createIcons();
+            return;
+          }
+          renderMockQuestion();
+        })
+        .catch(err => {
+          console.error(err);
+          workspace.innerHTML = `
+            <div class="empty-state" style="border:none; background:none;">
+              <i data-lucide="cloud-off" style="color: var(--text-muted); width:48px; height:48px;"></i>
+              <h3>Connection Failed</h3>
+              <p>Failed to connect to the dynamic mock generator. Ensure backend is running.</p>
+            </div>
+          `;
+          lucide.createIcons();
+        });
+    }
+
+    function renderMockQuestion() {
+      const workspace = document.getElementById('mock-workspace');
+      const qData = mockQuestions[currentMockQuestionIdx];
+
+      workspace.innerHTML = `
+        <div class="mock-exam-question-box">
+          <div class="mock-q-meta">
+            <span class="checklist-subtopic-tag">Question ${currentMockQuestionIdx + 1} of ${mockQuestions.length}</span>
+            <span style="font-size:12px; color:var(--text-muted);">Current Score: ${mockScore}</span>
+          </div>
+
+          <h3 class="mock-q-title">${qData.q}</h3>
+
+          <div class="mock-options-list">
+            ${qData.options.map((opt, i) => `
+              <div class="mock-option-item" onclick="submitMockAnswer(${i})">
+                <span class="mock-option-letter">${String.fromCharCode(65 + i)}</span>
+                <div>${opt}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function submitMockAnswer(selectedIdx) {
+      const qData = mockQuestions[currentMockQuestionIdx];
+      const items = document.querySelectorAll('.mock-option-item');
+      
+      // Disable further clicks
+      items.forEach(el => el.style.pointerEvents = 'none');
+
+      if (selectedIdx === qData.correct) {
+        mockScore++;
+        items[selectedIdx].classList.add('correct');
+      } else {
+        items[selectedIdx].classList.add('incorrect');
+        items[qData.correct].classList.add('correct');
+      }
+
+      // Render explanation and next button
+      const box = document.querySelector('.mock-exam-question-box');
+      
+      const expDiv = document.createElement('div');
+      expDiv.className = "mock-explanation-box";
+      expDiv.innerHTML = `
+        <strong>💡 UPSC Expert Explanation:</strong>
+        <p style="margin-top:6px; font-weight:300;">${qData.explanation}</p>
+      `;
+      box.appendChild(expDiv);
+
+      const nextBtnRow = document.createElement('div');
+      nextBtnRow.className = "mock-btn-row";
+      
+      const isLast = currentMockQuestionIdx === mockQuestions.length - 1;
+      nextBtnRow.innerHTML = `
+        <button class="btn-focus" style="border-radius:8px; padding:10px 24px;" onclick="${isLast ? 'showMockExamResults()' : 'nextMockQuestion()'}">
+          <span>${isLast ? 'Finish Exam' : 'Next Question'}</span>
+          <i data-lucide="arrow-right" style="width:16px; height:16px;"></i>
+        </button>
+      `;
+      box.appendChild(nextBtnRow);
+      lucide.createIcons();
+    }
+
+    function nextMockQuestion() {
+      currentMockQuestionIdx++;
+      renderMockQuestion();
+    }
+
+    function showMockExamResults() {
+      const workspace = document.getElementById('mock-workspace');
+      const pct = Math.round((mockScore / mockQuestions.length) * 100);
+      
+      workspace.innerHTML = `
+        <div class="empty-state" style="border:none; background:none;">
+          <i data-lucide="award" style="color: var(--accent-purple-light); width:64px; height:64px;"></i>
+          <h2 style="font-family:var(--font-heading); font-size:24px; color:var(--text-primary); margin-top:12px;">Exam Completed!</h2>
+          <h3 style="color:var(--accent-cyan-light); font-size:32px; margin-top:8px;">${mockScore} / ${mockQuestions.length} Correct</h3>
+          <p style="max-width:300px; margin-top:8px; color:var(--text-secondary);">Your success rate is <strong>${pct}%</strong>. This result is linked dynamically to your Syllabus milestones tracker.</p>
+          <button class="btn-focus" style="margin-top:24px; border-radius:10px; padding:12px 28px;" onclick="startMockTest()">
+            <span>Restart Mock Test</span>
+          </button>
+        </div>
+      `;
+      lucide.createIcons();
+    }
+
+
+
+    // ==============================================
+    // AI MENTOR CHATBOT LOGIC
+    // ==============================================
+    function triggerSuggestedQ(text) {
+      appendChatMessage(text, 'user');
+      showAssistantTyping();
+    }
+
+    function handleChatKeydown(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendChatMessage();
+      }
+    }
+
+    function sendChatMessage() {
+      const textarea = document.getElementById('chat-textarea');
+      const val = textarea.value.trim();
+      if (!val) return;
+
+      appendChatMessage(val, 'user');
+      textarea.value = '';
+      showAssistantTyping();
+    }
+
+    function formatMarkdownToHTML(text) {
+      if (!text) return "";
+      
+      // Basic escaping cleanups
+      let formatted = text.replace(/\\n/g, '\n').trim();
+      
+      // Bold: **text** -> <strong>text</strong>
+      formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      
+      const lines = formatted.split('\n');
+      let inList = false;
+      let inNumberedList = false;
+      let resultLines = [];
+      
+      lines.forEach(line => {
+        let trimmed = line.trim();
+        if (!trimmed) {
+          if (inList) { resultLines.push('</ul>'); inList = false; }
+          if (inNumberedList) { resultLines.push('</ol>'); inNumberedList = false; }
+          resultLines.push('<div style="height: 8px;"></div>');
+          return;
+        }
+        
+        // Bullet list item
+        if (trimmed.startsWith('* ') || trimmed.startsWith('- ') || trimmed.startsWith('• ')) {
+          if (inNumberedList) { resultLines.push('</ol>'); inNumberedList = false; }
+          if (!inList) {
+            resultLines.push('<ul style="margin-left: 20px; margin-bottom: 12px; list-style-type: disc;">');
+            inList = true;
+          }
+          const itemText = trimmed.replace(/^[\*\-•]\s+/, '').trim();
+          resultLines.push(`<li style="margin-bottom: 6px; line-height: 1.6; color: var(--text-secondary);">${itemText}</li>`);
+        } 
+        // Numbered list item
+        else if (/^\d+[\.\)]\s+/.test(trimmed)) {
+          if (inList) { resultLines.push('</ul>'); inList = false; }
+          if (!inNumberedList) {
+            resultLines.push('<ol style="margin-left: 20px; margin-bottom: 12px; list-style-type: decimal;">');
+            inNumberedList = true;
+          }
+          const itemText = trimmed.replace(/^\d+[\.\)]\s+/, '').trim();
+          resultLines.push(`<li style="margin-bottom: 6px; line-height: 1.6; color: var(--text-secondary);">${itemText}</li>`);
+        } 
+        // Paragraph line
+        else {
+          if (inList) { resultLines.push('</ul>'); inList = false; }
+          if (inNumberedList) { resultLines.push('</ol>'); inNumberedList = false; }
+          resultLines.push(`<p style="margin-bottom: 10px; line-height: 1.6; color: var(--text-secondary);">${trimmed}</p>`);
+        }
+      });
+      
+      if (inList) resultLines.push('</ul>');
+      if (inNumberedList) resultLines.push('</ol>');
+      
+      return resultLines.join('\n');
+    }
+
+    function appendChatMessage(text, sender) {
+      const scroller = document.getElementById('chat-scroller');
+      const bubble = document.createElement('div');
+      bubble.className = `chat-bubble ${sender}`;
+      
+      const avatarHTML = sender === 'user' ? 
+        `<div class="chat-avatar"><i data-lucide="user" style="width:16px; height:16px;"></i></div>` :
+        `<div class="chat-avatar"><i data-lucide="sparkles" style="width:16px; height:16px;"></i></div>`;
+
+      // Format markdown/text to HTML if sender is assistant
+      const formattedContent = sender === 'assistant' ? formatMarkdownToHTML(text) : `<p>${text}</p>`;
+
+      bubble.innerHTML = `
+        ${avatarHTML}
+        <div class="chat-message-content">${formattedContent}</div>
+      `;
+      scroller.appendChild(bubble);
+      scroller.scrollTop = scroller.scrollHeight;
+      lucide.createIcons();
+    }
+
+    function showAssistantTyping() {
+      const scroller = document.getElementById('chat-scroller');
+      const typingBubble = document.createElement('div');
+      typingBubble.className = "chat-bubble assistant";
+      typingBubble.id = "assistant-typing";
+      typingBubble.innerHTML = `
+        <div class="chat-avatar"><i data-lucide="sparkles" style="width:16px; height:16px;"></i></div>
+        <div class="chat-message-content" style="color:var(--text-muted); font-style:italic; display:flex; align-items:center; gap:10px;">
+          <span>Structuring a Civil Services reference response</span>
+          <div style="display:flex; gap:4px;">
+            <div style="width:6px; height:6px; background-color:var(--accent-purple-light); border-radius:50%; animation:soundPulse 0.8s infinite alternate;"></div>
+            <div style="width:6px; height:6px; background-color:var(--accent-purple-light); border-radius:50%; animation:soundPulse 0.8s infinite alternate 0.2s;"></div>
+            <div style="width:6px; height:6px; background-color:var(--accent-purple-light); border-radius:50%; animation:soundPulse 0.8s infinite alternate 0.4s;"></div>
+          </div>
+        </div>
+      `;
+      scroller.appendChild(typingBubble);
+      scroller.scrollTop = scroller.scrollHeight;
+      lucide.createIcons();
+
+      const userMsgs = document.querySelectorAll('.chat-bubble.user');
+      const lastMsg = userMsgs[userMsgs.length - 1].querySelector('.chat-message-content').textContent;
+
+      fetch('/mentor-chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ message: lastMsg })
+      })
+        .then(response => {
+          if (!response.ok) throw new Error("Mentor failed to respond");
+          return response.json();
+        })
+        .then(data => {
+          const tEl = document.getElementById('assistant-typing');
+          if (tEl) tEl.remove();
+          appendChatMessage(data.response, 'assistant');
+        })
+        .catch(err => {
+          console.error(err);
+          const tEl = document.getElementById('assistant-typing');
+          if (tEl) tEl.remove();
+          appendChatMessage("I apologize, Aspirant. I encountered an issue connecting to my core knowledge vault. Please check if your FastAPI backend is running.", 'assistant');
+        });
+    }
+
+    // ==============================================
+    // FOCUS MODE / POMODORO TIMER CORE LOGIC
+    // ==============================================
+    let pomoInterval = null;
+    let pomoTotalSeconds = 1500; // default 25 minutes
+    let pomoSecondsRemaining = 1500;
+    let isPomoRunning = false;
+    
+    // Web Audio Variables
+    let audioCtx = null;
+    let synthNodes = {
+      drone: null,
+      binauralLeft: null,
+      binauralRight: null,
+      rain: null
+    };
+
+    function toggleFocusMode(state) {
+      const overlay = document.getElementById('focus-workspace');
+      if (state) {
+        overlay.classList.add('open');
+        document.getElementById('app-sidebar').style.transform = 'translateX(-100%)';
+        document.getElementById('main-content').style.marginLeft = '0';
+        document.getElementById('main-content').style.width = '100%';
+      } else {
+        overlay.classList.remove('open');
+        document.getElementById('app-sidebar').style.transform = 'translateX(0)';
+        document.getElementById('main-content').style.marginLeft = '260px';
+        document.getElementById('main-content').style.width = 'calc(100% - 260px)';
+        
+        // Stop timer and synth sounds on exit
+        if (isPomoRunning) triggerPomoTimer();
+        stopAllSoundscapes();
+      }
+    }
+
+    function updateCustomPomoDuration() {
+      if (isPomoRunning) {
+        alert("Please pause the timer first to change the session duration!");
+        document.getElementById('custom-pomo-minutes').value = Math.ceil(pomoSecondsRemaining / 60);
+        return;
+      }
+      const minsInput = document.getElementById('custom-pomo-minutes');
+      let mins = parseInt(minsInput.value);
+      if (isNaN(mins) || mins < 1) {
+        mins = 25;
+        minsInput.value = 25;
+      } else if (mins > 180) {
+        mins = 180;
+        minsInput.value = 180;
+      }
+      pomoTotalSeconds = mins * 60;
+      pomoSecondsRemaining = pomoTotalSeconds;
+      updatePomoClockDisplay();
+      document.getElementById('pomo-ring-glow').style.transform = `rotate(0deg)`;
+    }
+
+    function triggerPomoTimer() {
+      const btn = document.getElementById('btn-pomo-play');
+      const statusEl = document.getElementById('pomo-status');
+
+      if (!isPomoRunning) {
+        // Start Timer
+        isPomoRunning = true;
+        btn.innerHTML = `<i data-lucide="pause"></i><span>Pause</span>`;
+        statusEl.textContent = "Focus Period Active";
+        statusEl.style.color = "var(--accent-cyan-light)";
+        
+        pomoInterval = setInterval(() => {
+          if (pomoSecondsRemaining > 0) {
+            pomoSecondsRemaining--;
+            updatePomoClockDisplay();
+            
+            // Spin visual feedback glow ring
+            const pct = (pomoSecondsRemaining / pomoTotalSeconds) * 360;
+            document.getElementById('pomo-ring-glow').style.transform = `rotate(-${pct}deg)`;
+          } else {
+            // Timer Finished
+            clearInterval(pomoInterval);
+            alert("Congratulations, Aspirant! Your study session is completed. Take a short 5-minute break!");
+            resetPomoTimer();
+          }
+        }, 1000);
+      } else {
+        // Pause Timer
+        isPomoRunning = false;
+        clearInterval(pomoInterval);
+        btn.innerHTML = `<i data-lucide="play"></i><span>Resume</span>`;
+        statusEl.textContent = "Interval Stalled";
+        statusEl.style.color = "var(--text-muted)";
+      }
+      lucide.createIcons();
+    }
+
+    function resetPomoTimer() {
+      clearInterval(pomoInterval);
+      isPomoRunning = false;
+      pomoSecondsRemaining = pomoTotalSeconds;
+      updatePomoClockDisplay();
+      
+      const btn = document.getElementById('btn-pomo-play');
+      btn.innerHTML = `<i data-lucide="play"></i><span>Resume</span>`;
+      
+      const statusEl = document.getElementById('pomo-status');
+      statusEl.textContent = "Interval Stalled";
+      statusEl.style.color = "var(--text-muted)";
+      document.getElementById('pomo-ring-glow').style.transform = `rotate(0deg)`;
+      lucide.createIcons();
+    }
+
+    function updatePomoClockDisplay() {
+      const mins = Math.floor(pomoSecondsRemaining / 60);
+      const secs = pomoSecondsRemaining % 60;
+      document.getElementById('pomo-clock').textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    // ==============================================
+    // WEB AUDIO API REAL SOOTHING SYNTHESIZERS
+    // ==============================================
+    function initAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function toggleSoundscape(type) {
+      initAudioContext();
+      const card = document.getElementById(`synth-${type}`);
+      const isActive = card.classList.contains('active');
+
+      if (!isActive) {
+        card.classList.add('active');
+        startSoundscape(type);
+      } else {
+        card.classList.remove('active');
+        stopSoundscape(type);
+      }
+    }
+
+    function startSoundscape(type) {
+      if (type === 'drone') {
+        // Deep Drone - Low warm rumble
+        const osc = audioCtx.createOscillator();
+        const filter = audioCtx.createBiquadFilter();
+        const gain = audioCtx.createGain();
+
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(55, audioCtx.currentTime); // Low A1 note
+        
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(100, audioCtx.currentTime); // Filter out harsh buzz
+        
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime); // Protective volume level
+
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+
+        synthNodes.drone = { osc, gain };
+      } else if (type === 'binaural') {
+        // Binaural Study - Left/Right separated frequencies for Alpha beats
+        const merger = audioCtx.createChannelMerger(2);
+        const gain = audioCtx.createGain();
+
+        const oscL = audioCtx.createOscillator();
+        oscL.frequency.setValueAtTime(200, audioCtx.currentTime); // 200Hz left ear
+
+        const oscR = audioCtx.createOscillator();
+        oscR.frequency.setValueAtTime(210, audioCtx.currentTime); // 210Hz right ear (10Hz Alpha differential)
+
+        const gainL = audioCtx.createGain();
+        const gainR = audioCtx.createGain();
+        gainL.gain.setValueAtTime(0.5, audioCtx.currentTime);
+        gainR.gain.setValueAtTime(0.5, audioCtx.currentTime);
+
+        oscL.connect(gainL);
+        oscR.connect(gainR);
+
+        // Map channels directly
+        gainL.connect(merger, 0, 0);
+        gainR.connect(merger, 0, 1);
+
+        gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+        merger.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        oscL.start();
+        oscR.start();
+
+        synthNodes.binaural = { oscL, oscR, gain };
+      } else if (type === 'rain') {
+        // Zen Rain - White noise buffer with bandpass filter
+        const bufferSize = audioCtx.sampleRate * 2;
+        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const data = buffer.getChannelData(0);
+        
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = Math.random() * 2 - 1;
+        }
+
+        const source = audioCtx.createBufferSource();
+        source.buffer = buffer;
+        source.loop = true;
+
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(1000, audioCtx.currentTime);
+        filter.Q.setValueAtTime(0.8, audioCtx.currentTime);
+
+        const gain = audioCtx.createGain();
+        gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+
+        source.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioCtx.destination);
+        source.start();
+
+        synthNodes.rain = { source, gain };
+      }
+    }
+
+    function stopSoundscape(type) {
+      const nodes = synthNodes[type];
+      if (!nodes) return;
+
+      try {
+        if (type === 'drone') {
+          nodes.osc.stop();
+        } else if (type === 'binaural') {
+          nodes.oscL.stop();
+          nodes.oscR.stop();
+        } else if (type === 'rain') {
+          nodes.source.stop();
+        }
+      } catch (err) {
+        console.log("Audio node already stopped");
+      }
+
+      synthNodes[type] = null;
+    }
+
+    function stopAllSoundscapes() {
+      ['drone', 'binaural', 'rain'].forEach(type => {
+        stopSoundscape(type);
+        const card = document.getElementById(`synth-${type}`);
+        if (card) card.classList.remove('active');
+      });
+    }
+
+    function toggleTheme() {
+      const isLight = document.body.classList.toggle('light-theme');
+      localStorage.setItem('upsc_portal_theme', isLight ? 'light' : 'dark');
+      
+      const iconEl = document.getElementById('theme-icon');
+      const textEl = document.getElementById('theme-text');
+      
+      if (isLight) {
+        if (iconEl) iconEl.setAttribute('data-lucide', 'moon');
+        if (textEl) textEl.textContent = 'Dark Theme';
+      } else {
+        if (iconEl) iconEl.setAttribute('data-lucide', 'sun');
+        if (textEl) textEl.textContent = 'Light Theme';
+      }
+      lucide.createIcons();
+    }
+  </script>
+</body>
+</html>

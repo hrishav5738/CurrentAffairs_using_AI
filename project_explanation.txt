@@ -1,0 +1,243 @@
+================================================================================
+           COMPREHENSIVE TECHNICAL OVERVIEW & PLATFORM NARRATIVE
+================================================================================
+Project: AI-Powered UPSC Current Affairs & Interactive Mentorship Platform
+Author: Raghvendra Shahi
+File: project_explanation.txt
+================================================================================
+
+This document provides a complete, top-to-bottom technical and functional 
+explanation of the AI-Powered UPSC Current Affairs and Interactive Mentorship 
+Platform. It is written in a detailed, descriptive text narrative so that any 
+reader—regardless of technical background—can fully comprehend the system's 
+design, core modules, AI architecture, and operational mechanics.
+
+---
+
+SECTION 1: CORE PORTAL VISION & THE CURRENT AFFAIRS CHALLENGE
+
+The Union Public Service Commission (UPSC) Civil Services Examination in India 
+is highly competitive. Aspirants are tested on a massive syllabus spanning 
+history, polity, economics, geography, science, environment, and international 
+relations. A core requirement is linking dynamic, real-world current affairs 
+with static textbook concepts. 
+
+Historically, this required aspirants to spend two to three hours every day 
+manually reading premium national newspapers like "The Hindu" and "Indian Express". 
+They had to write down notes, categorize them under appropriate General Studies 
+syllabus folders (GS1, GS2, GS3, GS4), and research the background and long-term 
+implications of each news event. In addition, passive reading is highly 
+inefficient without daily mock testing, and personal, high-quality academic 
+mentorship is either highly expensive or delayed.
+
+Our platform completely automates this entire lifecycle. It functions as an 
+intelligent learning and evaluation portal that aggregates, extracts, 
+summarizes, indexes, and evaluates daily news. By introducing state-of-the-art 
+generative AI engines, relational storage, and interactive web elements, the 
+portal converts the passive, overwhelming reading process into an active, 
+syllabus-aligned learning experience.
+
+---
+
+SECTION 2: END-TO-END DATA AND PROCESSING SYSTEM FLOW
+
+The operational workflow of the platform is designed as a continuous, robust 
+data pipeline. It begins with raw national newspaper RSS feeds and ends with 
+a fluid, interactive user dashboard.
+
+1. Daily Aggregation: A background task parser connects to the live RSS feeds 
+   of The Hindu and Indian Express. It extracts the raw titles and article URLs.
+2. Intelligent Headline Filtering: The parser validates each headline against 
+   a robust list of civil services keywords (e.g., Supreme Court, RBI, ISRO, 
+   UN, Policy, Scheme, Climate Change). Headlines that do not contain these 
+   keywords are discarded, ensuring the pipeline only processes articles with 
+   high academic yield.
+3. Full-Text Scraping: Validated URLs are sent to the article extractor module. 
+   The module downloads the full HTML of each page, filters out advertisements, 
+   headers, footers, tracking scripts, and sidebars, and parses the clean, 
+   boilerplate-free main text.
+4. Parallel AI Processing: The scraped text is sent to the AWS Bedrock LLM 
+   layer. Here, the system runs parallel threads to summarize and categorize 
+   the articles concurrently, using a highly specialized academic prompt.
+5. Relational SQLite Syncing: The finalized, categorized, and summarized 
+   articles are synchronized with a local SQLite database. A unique index 
+   constraint on article titles prevents any duplicate items from being saved, 
+   ensuring the database remains clean.
+6. Local JSON Caching: Simultaneously, the daily run is cached in a structured, 
+   timestamped JSON file in the "outputs/" folder to act as a historical 
+   archive and backend safety fallback.
+7. Web API and Dashboard: The FastAPI web server reads this database and 
+   serves a premium glassmorphism interface. Active students can browse the daily 
+   summaries, query a RAG-enabled AI Mentor chatbot, and execute dynamic mock tests.
+
+---
+
+SECTION 3: THE DUAL-MODEL INNOVATION (LLAMA 3 70B & 8B)
+
+To optimize the system for production-grade reliability, cost-efficiency, 
+and user experience, we implemented a split-model cognitive architecture. 
+The platform routes tasks to different LLM parameter sizes based on the task's 
+complexity and latency profiles:
+
+1. Offline Summarization Pipeline: Driven by Llama 3 70B
+   Summarizing dense, multi-faceted news articles for UPSC is highly demanding. 
+   It requires a deep understanding of historical legal rulings, administrative 
+   acts, international treaties, and socio-economic policies. A small model 
+   can oversimplify complex news, omit key points, or introduce factual 
+   hallucinations. We utilize the massive **Llama 3 70B Instruct** model for the 
+   daily background summarizer. Since this runs asynchronously in the background 
+   (or via a scheduled daily cron job), latency is not a bottleneck. This 
+   guarantees that students get extremely high-fidelity, nuanced, and factually 
+   accurate study notes.
+
+2. Student-Facing Interactive Features: Driven by Llama 3 8B
+   A student interacting with a chatbot or quiz deck expects a real-time, snappy 
+   response. Waiting ten to fifteen seconds for a larger model to respond spoils 
+   the user experience. We route the **AI Mentor Chatbot** and the **Dynamic Mock 
+   Test Generator** to the ultra-fast **Llama 3 8B Instruct** model. This model 
+   has low time-to-first-token latency and high throughput, making the portal 
+   feel incredibly fluid and responsive.
+
+3. Separate Rate-Limit Pools:
+   By assigning different model IDs on AWS Bedrock, we completely separate our 
+   API rate-limit pools. If the daily crawler is running in the background and 
+   heavily invoking the 70B model, it will **never throttle or slow down** active 
+   students who are chatting with the 8B AI Mentor!
+
+---
+
+SECTION 4: CODEBASE ARCHITECTURE & MODULE MECHANICS
+
+Let's break down exactly what each core module in the "app/" directory does:
+
+1. Data Scraping & Extraction Module (`app/fetchers/`)
+   * `rss_fetchers.py`: Connects to newspaper RSS feeds, parses XML nodes using 
+     the `feedparser` library, checks headlines against UPSC keywords, handles 
+     immediate duplicate checking using local hash sets, and returns a clean 
+     list of URLs.
+   * `article_extractor.py`: Leverages the `newspaper3k` library. It performs 
+     clean HTML stripping, extracts publication dates, parsed text, and author 
+     names, and returns structured Python dictionaries.
+
+2. AI Summarizer Module (`app/summarizer/`)
+   * `ai_summarizer.py`: The core processing engine. It initializes the AWS 
+     Bedrock client with automatic standard retries (configured up to 10 attempts 
+     with exponential backoff to handle throttling). It routes scraped articles 
+     through a Python `ThreadPoolExecutor` with a pool of workers to process 
+     summaries in parallel. The prompt instructs Llama 3 70B to categorize 
+     the article into Polity, Economy, S&T, Environment, Defence, or General, 
+     and output a highly structured, 3-part study guide covering Background, 
+     Why it Matters, and Syllabus/Governance implications.
+
+3. Storage & Syncing Module (`app/storage/`)
+   * `db_manager.py`: Sets up and manages the SQLite relational schema. It 
+     maintains the `articles` table (containing unique titles, categories, and 
+     summaries) and the `mock_history` table (tracking user quiz attempts). It 
+     also runs a rolling database purge function that automatically deletes 
+     records older than 3 months on every sync.
+   * RAG Engine (`search_articles`): To offer instant contextual retrieval for 
+     the chatbot, we built a highly optimized stop-word keyword parser. It 
+     extracts alphanumeric keywords from the student's question, filters out 
+     common English filler words (like *please*, *what*, *explain*), and executes 
+     a dynamic SQL wildcard query to retrieve highly relevant historical news 
+     articles from the SQLite database.
+   * `save_json.py`: Coordinates saving. It triggers the SQLite db sync and 
+     caches the output as a formatted JSON file in the "outputs/" folder.
+
+4. Daily Background Scheduler (`app/scheduler/`)
+   * `cron_scheduler.py`: Integrates `apscheduler`. It spins up a background 
+     scheduler thread on web application startup and schedules the scraper 
+     pipeline to run **daily at 8:00 AM**, ensuring fresh data is ready 
+     every morning.
+
+5. REST API & Web Gateway (`app/ui/`)
+   * `api.py`: Exposes FastAPI REST routes. It handles startup initialization, 
+     CORS middleware settings for cross-origin tools, and houses three main 
+     endpoints:
+     * `/latest-news` (GET): Pulls the latest synced daily summaries from the 
+       SQLite database (falling back to outputs JSON cache files if empty).
+     * `/generate-mock` (GET): Pulls recent articles and prompts Llama 3 8B 
+       to dynamically generate 3 UPSC Prelims multiple-choice questions 
+       matching current events, complete with detailed explanations.
+     * `/mentor-chat` (POST): Runs the database keyword RAG query to retrieve 
+       related current affairs, constructs a comprehensive prompt, and 
+       generates an academic, supportive reference answer from the AI Mentor.
+   * `index.html`: A premium glassmorphism dashboard built using modern Vanilla 
+     CSS, featuring organized GS syllabus tabs, a real-time scrollable chat 
+     console with waiting vector animations, and a fully interactive quiz deck 
+     displaying immediate color-coded answers and comprehensive explanation panels.
+
+---
+
+SECTION 5: SYSTEM CONFIGURATION & LOCAL DEPLOYMENT GUIDE
+
+Deploying and running the portal locally on a Windows system is quick and robust.
+
+1. Workspace Navigation:
+   Open your PowerShell or command line and navigate to the project directory:
+   `cd "C:\Users\raghv\OneDrive\Desktop\Current_affairs_using_AI"`
+
+2. Virtual Environment Setup:
+   Initialize and activate a local Python virtual environment to keep your 
+   system dependencies isolated and clean:
+   `python -m venv venv`
+   `.\venv\Scripts\Activate.ps1`
+
+3. Dependency Installation:
+   Install the complete list of required packages from the requirements file:
+   `pip install -r requirements.txt`
+
+4. Environment Variables Configuration:
+   Create a `.env` file in the root directory and add your AWS Bedrock access 
+   keys and region:
+   `AWS_ACCESS_KEY_ID="YOUR_ACCESS_KEY_ID"`
+   `AWS_SECRET_ACCESS_KEY="YOUR_SECRET_ACCESS_KEY"`
+   `AWS_REGION="ap-south-1"`
+
+5. Pipeline Inception Run:
+   Run the main script to trigger the news scraper and summarizer. This fetches 
+   national news, runs Llama 3 70B summaries in the background, and populates 
+   your SQLite database. We set the UTF-8 environment variable to prevent any 
+   unicode or emoji print crashes in the Windows console:
+   `$env:PYTHONUTF8=1`
+   `$env:PYTHONIOENCODING="utf-8"`
+   `python main.py`
+
+6. FastAPI Server Launch:
+   Boot up the uvicorn web server to serve the interactive web app locally. 
+   We enable `--reload` so that uvicorn watches your directories and hot-reloads 
+   the server instantly if any edits are made:
+   `python -m uvicorn app.ui.api:app --host 127.0.0.1 --port 8000 --reload`
+
+7. Portal Access:
+   Open your browser and navigate to: **http://127.0.0.1:8000/**
+
+---
+
+SECTION 6: FUTURE PLATFORM EXPANSION ROADMAP
+
+To transition this platform into a globally scalable, production-grade learning 
+system, we have outlined four major future expansions:
+
+1. Hybrid Semantic Vector Search:
+   Migrate from SQL keyword wildcard queries to a dedicated vector database 
+   (like Qdrant or ChromaDB) running dense text embeddings (e.g., AWS Titan or 
+   OpenAI Embeddings). This will enable semantic-based RAG, allowing the AI Mentor 
+   to answer conceptually related doubts even if they do not share exact words.
+
+2. Daily Audio Podcast Briefings:
+   Integrate a Text-to-Speech (TTS) engine to automatically generate 5-minute 
+   audio podcast briefs summarizing the daily news. This will allow busy 
+   aspirants to listen to current affairs on the go during commutes.
+
+3. Regional Language Translations:
+   Utilize translation layers to make current affairs summaries, mock tests, 
+   and chatbot mentorship available in major regional Indian languages (like 
+   Hindi, Tamil, and Telugu), breaking the English language barrier for rural 
+   aspirants.
+
+4. Deep Learning & Progress Analytics:
+   Build comprehensive student analytics dashboards tracking mock exam scores, 
+   answering times, and syllabus category success rates to map personal progress 
+   curves and identify critical syllabus weaknesses automatically.
+================================================================================
