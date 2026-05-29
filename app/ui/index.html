@@ -2524,6 +2524,9 @@
 
       fetch(`/generate-mock?topic=${topic}`)
         .then(response => {
+          if (response.status === 429) {
+            throw new Error("QuotaExceeded");
+          }
           if (!response.ok) throw new Error("Backend Offline");
           return response.json();
         })
@@ -2547,13 +2550,23 @@
         })
         .catch(err => {
           console.error(err);
-          workspace.innerHTML = `
-            <div class="empty-state" style="border:none; background:none;">
-              <i data-lucide="cloud-off" style="color: var(--text-muted); width:48px; height:48px;"></i>
-              <h3>Connection Failed</h3>
-              <p>Failed to connect to the dynamic mock generator. Ensure backend is running.</p>
-            </div>
-          `;
+          if (err.message === "QuotaExceeded") {
+            workspace.innerHTML = `
+              <div class="empty-state" style="border:none; background:none;">
+                <i data-lucide="alert-triangle" style="color: var(--accent-purple-light); width:48px; height:48px;"></i>
+                <h3>Mock Quota Reached</h3>
+                <p style="max-width:380px; margin-top:8px; line-height:1.6;">⚠️ **Daily Mock Exam Quota Reached!** You have reached your limit of 10 UPSC mock generated papers for today. Please review your active syllabus milestone trackers or attempt static fallback tests.</p>
+              </div>
+            `;
+          } else {
+            workspace.innerHTML = `
+              <div class="empty-state" style="border:none; background:none;">
+                <i data-lucide="cloud-off" style="color: var(--text-muted); width:48px; height:48px;"></i>
+                <h3>Connection Failed</h3>
+                <p>Failed to connect to the dynamic mock generator. Ensure backend is running.</p>
+              </div>
+            `;
+          }
           lucide.createIcons();
         });
     }
@@ -2782,6 +2795,9 @@
         body: JSON.stringify({ message: lastMsg })
       })
         .then(response => {
+          if (response.status === 429) {
+            throw new Error("QuotaExceeded");
+          }
           if (!response.ok) throw new Error("Mentor failed to respond");
           return response.json();
         })
@@ -2794,7 +2810,11 @@
           console.error(err);
           const tEl = document.getElementById('assistant-typing');
           if (tEl) tEl.remove();
-          appendChatMessage("I apologize, Aspirant. I encountered an issue connecting to my core knowledge vault. Please check if your FastAPI backend is running.", 'assistant');
+          if (err.message === "QuotaExceeded") {
+            appendChatMessage("⚠️ **Daily Prep Quota Exceeded!** To prevent AI abuse and maintain fair resource allocation, you are limited to 10 queries per day. Please return tomorrow to continue your mentorship sessions!", 'assistant');
+          } else {
+            appendChatMessage("I apologize, Aspirant. I encountered an issue connecting to my core knowledge vault. Please check if your FastAPI backend is running.", 'assistant');
+          }
         });
     }
 

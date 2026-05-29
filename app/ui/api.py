@@ -1,9 +1,12 @@
 import json
 import os
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
 from app.storage.db_manager import (
     init_db,
@@ -18,7 +21,10 @@ from app.summarizer.ai_summarizer import client
 MENTOR_MODEL_ID = "meta.llama3-8b-instruct-v1:0"
 
 
+limiter = Limiter(key_func=get_remote_address)
 app = FastAPI()
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
 # Add CORS middleware to allow external connections like Stitch UI
@@ -116,7 +122,8 @@ def get_latest_news():
 
 
 @app.get("/generate-mock")
-def generate_mock(topic: str = "gs2", week_offset: int = 0):
+@limiter.limit("10/day")
+def generate_mock(request: Request, topic: str = "gs2", week_offset: int = 0):
     """
     Dynamically queries recent articles matching a topic / timeframe from the database,
     and prompts Llama 3 via AWS Bedrock to generate 3 customized UPSC Prelims questions.
@@ -283,7 +290,8 @@ class ChatRequest(BaseModel):
 
 
 @app.post("/mentor-chat")
-def mentor_chat(request: ChatRequest):
+@limiter.limit("10/day")
+def mentor_chat(request: ChatRequest, db_request: Request):
     print(f"💬 [FastAPI] AI Mentor processing query: '{request.message}'...")
     
     # 1. Search for related articles in SQLite database for keyword-based context (RAG)
